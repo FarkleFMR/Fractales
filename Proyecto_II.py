@@ -1,6 +1,6 @@
 #Creado por Leonardo Fariña y Murillo Aldecoba
 #Fecha de creación: 25/05/2020 10:10 pm
-#Última modificación: 02/06/2020 00:18 AM
+#Última modificación: 03/06/2020 01:11 AM
 #Versión 3.9.2
 
 #Importación de librerias
@@ -198,7 +198,220 @@ def fitness(ruta_figura,nombre_imagen):
     fitness = ((puntIgua)*100)/punt/100
     return fitness
 
+
+def cruce(padre,madre,gen,aux_nom):
+    '''
+    Entradas:
+        padre (la posición que ocupa en la generación)
+        madre (la posición que ocupa en la generación)
+        gen (generación a la que pertenecen los padres)
+        aux_nom (auxiliar para poner un nombre al fractal)
+    Funcionalidad:
+        Hacer el cruce de los cromosomas entre el padre y la madre
+        Aplicarle un pequeña mutación
+    Salida:
+        nuevos_indvs (matriz con 2 individuos nuevos)
+    '''    
+    # Largo de bits de cada individuo
+    longi_bits_pa = 0
+    longi_bits_ma = 0
+
+    # Replicamos los individuos con un nombre nuevo, un padre nuevo,un madre nueva y los parametros en binario
+    nuevos_indvs = []
+    pa_ma = padre
+    aux = 0
+    while aux < 2:
+        nuev_indv = []
+        if aux == 0:
+            nuev_nom = str(gen+1)+generaciones[gen][pa_ma][0][0]+str(aux_nom)
+        else:
+            nuev_nom = str(gen+1)+generaciones[gen][pa_ma][0][0]+str(aux_nom+5)
+        nuev_indv.append(nuev_nom)
+        indice = 1
+        while indice < 7:
+                nuev_indv.append([bin(generaciones[gen][pa_ma][indice][0]),
+                                  bin(generaciones[gen][pa_ma][indice][1])]
+                                 )                    
+                if aux == 0:
+                    longi_bits_pa += len(str(nuev_indv[indice][0])[2:])
+                    longi_bits_pa += len(str(nuev_indv[indice][1])[2:])
+                else:
+                    longi_bits_ma += len(str(nuev_indv[indice][0])[2:])
+                    longi_bits_ma += len(str(nuev_indv[indice][1])[2:])
+                    
+                indice += 1
+        nuev_indv.append([padre,madre])
+        pa_ma = madre
+        aux += 1
+        nuevos_indvs.append(nuev_indv)
+
+    #Proceso de cambio de cromosomas
+        
+    #Nos fijamos cual va a ser el rango de bits a cambiar
+    rang_max_crom = 0
+    if longi_bits_pa <= longi_bits_ma:
+        rang_max_crom = longi_bits_pa
+    else:
+        rang_max_crom = longi_bits_ma
+    chan_crom = random.randint(rang_max_crom,rang_max_crom)
+
+
+    #Mutación
+    indice_mut_1 = random.randint(0,1)
+    indice_mut_0 = random.randint(0,1)
+    crom_camb_0 = random.randint(0,chan_crom)
+    crom_camb_1 = random.randint(0,chan_crom)
+    
+    chan_crom
+    #Intercambiamos los cromosomas(los parametros en bits)    
+    temp_bits = '' #Temporal para trabjar los bits sobrantes
+    aux = 0
+    #Si no hemos cambiado todos los bits a cambiar entonces
+    while chan_crom > 0 :        
+        indice = 1
+        #Recorremos los parametros que estan en binario
+        while indice < 7:
+            param = 0
+            #Cada parametro es un rango entonces cambiamos entre 0 y 1
+            while param < 2:                
+                #Longitudes de los parametros a intercambiar
+                lon_parm_0 = len(str(nuevos_indvs[0][indice][param])[2:])
+                lon_parm_1 = len(str(nuevos_indvs[1][indice][param])[2:])
+
+                #Si tenemos mutación cambiamos 1 solo bit del individuo
+                if indice_mut_0 == 1:
+                    rand = random.randrange(8)
+                    if crom_camb_0 <= (chan_crom+rand) and crom_camb_0 >= (chan_crom-rand):
+                        bit_camb_0 = random.randint(2,lon_parm_0-1)
+                        aux_str = list(str(nuevos_indvs[0][indice][param]))
+                        aux_str[bit_camb_0] = str(random.randint(0,1))
+                        nuevos_indvs[0][indice][param]= bin(int(str("".join(aux_str)),2))
+                    indice_mut_0 = 0
+                if indice_mut_1 == 1:
+                    rand = random.randrange(8)
+                    if crom_camb_1 <= (chan_crom+rand) and crom_camb_1 >= (chan_crom-rand):
+                        bit_camb_1 = random.randint(2,lon_parm_1-1)
+                        aux_str = list(str(nuevos_indvs[1][indice][param]))
+                        aux_str[bit_camb_1] = str(random.randint(0,1))
+                        nuevos_indvs[1][indice][param]= bin(int(str("".join(aux_str)),2))
+                    indice_mut_1 = 0
+
+                #Auxiliar que nos ayudara a hacer el intercambio de bits
+                aux_temp_bin = nuevos_indvs[0][indice][param]
+                #Si tienen el mismo largo los cambiamos de lugar no más
+                if lon_parm_0 == lon_parm_1:
+                    nuevos_indvs[0][indice][param] = nuevos_indvs[1][indice][param]
+                    nuevos_indvs[1][indice][param] = aux_temp_bin
+                    chan_crom -= lon_parm_0
+                #Si la longitud de la cadena de bits del individuo 0 es menor que la del individuo 1 entonces   
+                elif lon_parm_0 < lon_parm_1:
+                    #Ponemos los bits que exceden su largo en temp_bits
+                    temp_bits = bin(int(str(nuevos_indvs[1][indice][param])[lon_parm_0+2:],2))
+                    #Hacemos el intercambio de bits
+                    nuevos_indvs[0][indice][param] = bin(int(str(nuevos_indvs[1][indice][param])[:(lon_parm_0+2)],2))
+                    nuevos_indvs[1][indice][param] = bin(int(str(aux_temp_bin)[:(lon_parm_0+2)],2))
+                    #Le restamos la cantidad de bits intercambiados
+                    chan_crom -= lon_parm_0
+                    #Nos fijamos que no tengamos bits sobrantes
+                    #Si tenemos, lo pasaremos al siguiente espacio del parametro 1,si no lo pasamos al siguiente parametro
+                    #Si estamos en el último parametro se los ponemos al principio del último parametro
+                    if temp_bits != '':
+                        tempo_lon = len(temp_bits)
+                        if indice != 6:                            
+                            if param == 0:
+                                temp_bin_aux = str(nuevos_indvs[1][indice][1])
+                                nuevos_indvs[1][indice][1] = str(temp_bits)+(temp_bin_aux[2:])
+                            else:
+                                temp_bin_aux = str(nuevos_indvs[1][indice+1][0])
+                                nuevos_indvs[1][indice+1][0] = str(temp_bits)+(temp_bin_aux[2:])
+                            temp_bits = ''
+                        else:
+                            nuevos_indvs[0][indice][1] += str(temp_bits)[2:]
+                            temp_bits = ''
+                        chan_crom -= tempo_lon
+
+                else:
+                    #Lo mismo que la anterior pero al revés
+                    temp_bits = bin(int(str(nuevos_indvs[0][indice][param])[lon_parm_1+2:],2))
+                    nuevos_indvs[0][indice][param] = bin(int(str(nuevos_indvs[1][indice][param])[:(lon_parm_1+2)],2))
+                    nuevos_indvs[1][indice][param] = bin(int(str(aux_temp_bin)[:(lon_parm_1+2)],2))
+                    
+                    chan_crom -= lon_parm_1
+                    
+                    if temp_bits != '':
+                        tempo_lon = len(temp_bits)
+                        if indice != 6:
+                            if param == 0:
+                                temp_bin_aux = str(nuevos_indvs[0][indice][1])
+                                nuevos_indvs[0][indice][1] = str(temp_bits)+(temp_bin_aux[2:])                            
+                            else:                                
+                                temp_bin_aux = str(nuevos_indvs[0][indice+1][0])
+                                nuevos_indvs[0][indice+1][0] = str(temp_bits)+(temp_bin_aux[2:])
+                            temp_bits = ''
+                        else:
+                            nuevos_indvs[1][indice][1] += str(temp_bits)[2:]
+                            temp_bits = ''
+                        chan_crom -= tempo_lon
+
+                param += 1
+            indice += 1
+        aux += 1
+
+    #Pasamos todos los parametros de binario a enteros
+    aux = 0
+    while aux < 2:
+        indice = 1
+        while indice < 7:
+            nuevos_indvs[aux][indice][0] = int(nuevos_indvs[aux][indice][0],2)
+            nuevos_indvs[aux][indice][1] = int(nuevos_indvs[aux][indice][1],2)                  
+            indice += 1
+        aux += 1
+    #Nos fijamos si ya tenemos la nueva generación
+    try:
+        basu = generaciones[gen+1]
+    except:
+        generaciones.append([])
+
+    #Agregamos los individuos a la nueva generación
+    generaciones[gen+1].append(nuevos_indvs[0])
+    generaciones[gen+1].append(nuevos_indvs[1])
+       
+
+def padres(padre,gen):
+    '''
+    Entradas:
+        padre (valor entre 0 y 1)
+        gen (generación a la que pertenecen los padres)
+    Funcionalidad:
+        Elegir un padre o madre para un nuevo fractal
+    Salida:
+        pa_ma (la posición que ocupa en la generación)
+    '''
+    pa_ma = 0
+    temp_normal = 0
+    pos_pa_ma = 0
+    while pos_pa_ma < 9:     
+        temp_normal += generaciones[gen][pos_pa_ma][-1]
+        if padre <= temp_normal:
+            pa_ma = pos_pa_ma
+            break        
+        pos_pa_ma += 1        
+    return pa_ma
+
+
+
+    
 def seleccion(niv_gen,nomb_fig):
+    '''
+    Entradas:
+        niv_gen (nivel de la generacion a seleccionar)
+        nomb_fig (nombre de la figura a comparar)
+    Funcionalidad:
+        Utilizar la función de fitness(), normalizar los valores.
+        Y llamar a la nueva generación con cruce()
+    Salida:
+        None
+    '''
     fractal_num=0
     avr = 0
     while fractal_num < 9:
@@ -206,6 +419,7 @@ def seleccion(niv_gen,nomb_fig):
         if porcentaje > 0.75:
             avr += 1-(((porcentaje-1)*4)*-1)
         fractal_num += 1        
+
     fractal_num=0
     while fractal_num < 9:
         porcentaje = fitness(nomb_fig,carpeta+"\\"+generaciones[niv_gen][fractal_num][0]+".bmp")
@@ -214,6 +428,14 @@ def seleccion(niv_gen,nomb_fig):
         else:
             generaciones[niv_gen][fractal_num].append(0)
         fractal_num += 1
+
+    nueva_fra = 0
+    while nueva_fra < 5:
+        pad = padres(random.random(),niv_gen)        
+        mad = padres(random.random(),niv_gen)
+        cruce(pad,mad,niv_gen,nueva_fra)            
+        nueva_fra += 1
+
 
 
 
@@ -230,8 +452,17 @@ generaciones =[[]]
 '''
 generaciones:
     [
-Nivel de población 0 ->  [Nombre, [34, 98], [4, 4], [6, 7], [2, 7], [1, 1], [4, 6], [0, 0]]
-Nivel de población 1 ->  ['A', [34, 98], [4, 4], [6, 7], [2, 7], [1, 1], [4, 6], [0, 0]]
+Nivel de población 0 ->  [
+                            nombre_imagen,
+                            [angulo1,angulo2],
+                            [diametronivel1,diametronivel2],
+                            [grozor1,grozor2],
+                            [ramificacion1,ramificacion2],
+                            [decremento1,decremento2],
+                            [profundidad1,profundidad2],
+                            [padre,madre],
+                            normalizado
+                        ]
     ]
 '''
 
@@ -240,18 +471,21 @@ try:
     mkdir(carpeta)
 except:
     print("Carpeta "+carpeta+" Creada")
+
+
     
 creacion_pobla_ini()
 
 
 nomb_fig = "Figuras/Fig1.bmp"
 niv_gen = 0
-
 seleccion(niv_gen,nomb_fig)
 
+
+
 i= 0
-while i < 9:
-    print(generaciones[0][i])
+while i < 10:
+    print(generaciones[1][i])
     i += 1
 
 
