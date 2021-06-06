@@ -1,6 +1,6 @@
 #Creado por Leonardo Fariña y Murillo Aldecoba
 #Fecha de creación: 25/05/2020 10:10 pm
-#Última modificación: 03/06/2020 01:11 AM
+#Última modificación: 03/06/2020 23:47 pm
 #Versión 3.9.2
 
 #Importación de librerias
@@ -13,7 +13,7 @@ from os import mkdir
 from random import choice
 from PIL import Image
 import numpy as np
-
+import copy
 
 
 
@@ -37,7 +37,7 @@ def dibujarArbolAux(x1, y1, angulo, angulo_de_ramificaciones,diametro_nivel,diam
         Hacer la llamada a la función dibujarArbol con todos los parametros con la profundidad y el grosor
     Salida:        
         None
-    '''
+    '''  
     profundidad = random.randint(rango_pro[0], rango_pro[1])
     diametro_troncoR = random.randint(diametro_tronco[0], diametro_tronco[1])    
     dibujarArbol(x1, y1, angulo, profundidad, angulo_de_ramificaciones,diametro_nivel,diametro_troncoR,ramificaciones,decremento_pro,rango_pro)
@@ -68,17 +68,20 @@ def dibujarArbol(x1, y1, angulo, profundidad, angulo_de_ramificaciones,diametro_
     decremento_proR = random.randint(decremento_pro[0], decremento_pro[1])
     ramasR = random.randint(ramificaciones[0], ramificaciones[1])
     ramas = ramasR
+
     angulo_aux = 0
-    angulo_aux2 = angulo_de_ramificacionesR/ramas    
+    angulo_aux2 = angulo_de_ramificacionesR/ramas
+    
     if profundidad > 0:
         x2 = x1 + int(math.cos(math.radians(angulo)) * profundidad * diametro_nivelR)
         y2 = y1 + int(math.sin(math.radians(angulo)) * profundidad * diametro_nivelR)        
         pygame.draw.line(screen, (0,0,0), (x1, y1), (x2, y2), diametro_tronco)
+
         while ramas > 0:
            angulo_aux2 *= choice([-1, 1])
-           angulo_aux = angulo_aux2 * random.randrange(ramasR)           
+           angulo_aux = angulo_aux2 * ramas#random.randrange(ramasR)           
            dibujarArbol(x2, y2, angulo + angulo_aux , profundidad - decremento_proR,angulo_de_ramificaciones,diametro_nivel,diametro_tronco-1,ramificaciones,decremento_pro,rango_pro)           
-           ramas = ramas - 1
+           ramas -= 1
            
         
 def input(event):
@@ -107,7 +110,6 @@ def generacion_de_fractales(angulo1,angulo2,diametronivel1,diametronivel2,grozor
         madre (Madre que se uso para generar el fractal)
         nivel_gen (Nivel de generación)
         
-        
     Funcionalidad:
         Generar fractales y guardarlos en una imagen
         
@@ -117,10 +119,12 @@ def generacion_de_fractales(angulo1,angulo2,diametronivel1,diametronivel2,grozor
     gen = []
     screen.fill((255,255,255))
     dibujarArbolAux(300, 550, -90,
-        [angulo1,angulo1+angulo2],[diametronivel1,diametronivel2],
+        [angulo1,angulo2],[diametronivel1,diametronivel2],
         [grozor1,grozor2],[ramificacion1,ramificacion2],
         [decremento1,decremento2],[profundidad1,profundidad2])
-    pygame.image.save(screen,carpeta+"\\"+nombre_imagen+".bmp")
+    
+    ima_salida = pygame.transform.scale(screen, (300, 300))
+    pygame.image.save(ima_salida,carpeta+"\\"+nombre_imagen+".bmp")
     gen.append([nombre_imagen,[angulo1,angulo1+angulo2],[diametronivel1,diametronivel2],[grozor1,grozor2],
                 [ramificacion1,ramificacion2],[decremento1,decremento2],[profundidad1,profundidad2],
                  [padre,madre]
@@ -140,9 +144,9 @@ def creacion_pobla_ini():
     n = 0
     while n < 10:
         angulo1 = random.randint(1, 90)
-        angulo2= random.randint(1,90)
-        diametronivel1 = random.randint(4, 4)
-        diametronivel2= random.randint(diametronivel1,4)
+        angulo2= random.randint(angulo1,120)
+        diametronivel1 = random.randint(2, 6)
+        diametronivel2= random.randint(diametronivel1,6)
         grozor1 = random.randint(4, 10)
         grozor2= random.randint(grozor1,10)
         ramificacion1 = random.randint(1, 7)
@@ -156,10 +160,10 @@ def creacion_pobla_ini():
 
 
 
-def fitness(ruta_figura,nombre_imagen):
+def fitness(arrayIm,nombre_imagen):
     '''
     Entradas:
-        ruta_figura (figura a la que queremos que se parezca el fractal)
+        arrayIm (array con la figura a comparar)
         nombre_imagen (fractal al que compararemos con la figura)
     Funcionalidad:
         Sacar un valor entre 0 y 1 de que tan parecida es la imagen(nombre_imagen) a la figura(ruta_figura)
@@ -167,13 +171,8 @@ def fitness(ruta_figura,nombre_imagen):
     Salida:
         fitness
     '''
-    fitness = 0
-    im = Image.open(ruta_figura)
-    im = im.resize((300,300), Image.ANTIALIAS)
-    arrayIm = np.array(im)
-    
+    fitness = 0    
     im2 = Image.open(nombre_imagen)
-    im2 = im2.resize((300,300), Image.ANTIALIAS)
     arrayIm2 = np.array(im2)
     
     fila = 0
@@ -189,14 +188,124 @@ def fitness(ruta_figura,nombre_imagen):
             if color == 0:
                 change = 1            
             if change == 1:
-                punt += 1
-                if color  == arrayIm2[fila][columna][0]:
-                    puntIgua += 1                  
+                punt += 2
+                if arrayIm2[fila][columna][0] == color:
+                    puntIgua += 1
+                if arrayIm2[fila][columna][0] == color:
+                    puntIgua += 1
+                if color == 0:
+                    if arrayIm2[fila][columna][0] != 0:
+                        puntIgua -= 1
+                    
             columna += 1
         columna = 0
         fila += 1
     fitness = ((puntIgua)*100)/punt/100
     return fitness
+
+
+def ingresar_indi(nuev_indiv,niv_gen):
+    '''
+    Entradas:
+        nuev_indiv (Individuo verificado)
+        niv_gen (nivel de generación del individuo)
+    Funcionalidad:
+        Extraer los datos del nuevo individuo y hacer la llamada de la función generacion_de_fractales()
+        con los parametros extraidos
+    Salida:
+        None
+    '''
+    print("Ingr ",nuev_indiv)
+    generacion_de_fractales(nuev_indiv[1][0],nuev_indiv[1][1],
+                            nuev_indiv[2][0],nuev_indiv[2][1],
+                            nuev_indiv[3][0],nuev_indiv[3][1],
+                            nuev_indiv[4][0],nuev_indiv[4][1],
+                            nuev_indiv[5][0],nuev_indiv[5][1],
+                            nuev_indiv[6][0],nuev_indiv[6][1],
+                            nuev_indiv[0],
+                            nuev_indiv[-1][0],nuev_indiv[-1][1],
+                            niv_gen)
+
+
+    
+def verifica_param(nuev_individuo):
+    '''
+    Entradas:
+        nuev_individuo (Individuo con los cromosomas cambiados)
+    Funcionalidad:
+        Verificar que los parametros sean aceptados para la creación del fractal
+        y modificarlos de ser necesario
+    Salida:
+        nuev_indiv (Individuo con los parametros verificados)
+    '''
+    # Comentario no se pudo asignar variables a nuevo_indi[indice][0] y nuevo_indi[indice][1] para hacer un código más
+    # limpio, ya que por alguna razon que no se encontro en la documentación de python dejaban de funcionar las comparaciones
+    nuevo_indi = nuev_individuo[:]    
+    aux_temp = 0
+    indice = 1
+    while indice < 7:                
+        if nuevo_indi[indice][0] < 1:
+            nuevo_indi[indice][0] = 1
+        if nuevo_indi[indice][1] < 1:
+            nuevo_indi[indice][1] = 1
+                
+        if nuevo_indi[indice][1] < nuevo_indi[indice][0]:
+            aux_temp = nuevo_indi[indice][1]
+            nuevo_indi[indice][1] = nuevo_indi[indice][0]
+            nuevo_indi[indice][0] = aux_temp
+                
+        if indice == 1:
+            if nuevo_indi[indice][0] > 120:
+                nuevo_indi[indice][0] = 120
+            if nuevo_indi[indice][1] > 120:
+                nuevo_indi[indice][1] = random.randint(nuevo_indi[indice][0],120) 
+                
+        if indice == 2:
+            if nuevo_indi[indice][0] < 2:
+                nuevo_indi[indice][0] = 2
+            if nuevo_indi[indice][1] < 2:
+                nuevo_indi[indice][1] = 2
+                
+            if nuevo_indi[indice][0] > 6:
+                nuevo_indi[indice][0] = 6
+            if nuevo_indi[indice][1] > 6:
+                nuevo_indi[indice][1] = 6
+                
+                
+        if indice == 3:
+            if nuevo_indi[indice][0] < 4:
+                nuevo_indi[indice][0] = 4
+            if nuevo_indi[indice][1] < 4:
+                nuevo_indi[indice][1] = 4
+
+            if nuevo_indi[indice][0] > 10:
+                nuevo_indi[indice][0] = 10
+            if nuevo_indi[indice][1] > 10:
+                nuevo_indi[indice][1] = 10
+                
+        if indice == 4:
+            if nuevo_indi[indice][0] > 7:
+                nuevo_indi[indice][0] = 7
+            if nuevo_indi[indice][1] > 7:
+                nuevo_indi[indice][1] = 7
+                
+        if indice == 5:
+            nuevo_indi[indice][0] = 1
+            nuevo_indi[indice][1] = 1
+            
+        if indice == 6:            
+            if nuevo_indi[indice][0] < 3:
+                nuevo_indi[indice][0] = 3
+            if nuevo_indi[indice][1] < 3:
+                nuevo_indi[indice][1] = 3
+
+            if nuevo_indi[indice][0] > 7:
+                nuevo_indi[indice][0] = 7
+            if nuevo_indi[indice][1] > 7:
+                nuevo_indi[indice][1] = 7
+                
+        indice += 1
+    return nuevo_indi
 
 
 def cruce(padre,madre,gen,aux_nom):
@@ -209,8 +318,9 @@ def cruce(padre,madre,gen,aux_nom):
     Funcionalidad:
         Hacer el cruce de los cromosomas entre el padre y la madre
         Aplicarle un pequeña mutación
+        Ingresar nuevos individuos a la siguiente generación
     Salida:
-        nuevos_indvs (matriz con 2 individuos nuevos)
+        None
     '''    
     # Largo de bits de cada individuo
     longi_bits_pa = 0
@@ -223,9 +333,9 @@ def cruce(padre,madre,gen,aux_nom):
     while aux < 2:
         nuev_indv = []
         if aux == 0:
-            nuev_nom = str(gen+1)+generaciones[gen][pa_ma][0][0]+str(aux_nom)
+            nuev_nom = str(gen+1)+chr(64+aux_nom+1)+str(aux_nom)
         else:
-            nuev_nom = str(gen+1)+generaciones[gen][pa_ma][0][0]+str(aux_nom+5)
+            nuev_nom = str(gen+1)+chr(64+aux_nom+6)+str(aux_nom+5)
         nuev_indv.append(nuev_nom)
         indice = 1
         while indice < 7:
@@ -245,125 +355,77 @@ def cruce(padre,madre,gen,aux_nom):
         aux += 1
         nuevos_indvs.append(nuev_indv)
 
-    #Proceso de cambio de cromosomas
-        
+    #Proceso de cambio de cromosomas   
     #Nos fijamos cual va a ser el rango de bits a cambiar
     rang_max_crom = 0
     if longi_bits_pa <= longi_bits_ma:
         rang_max_crom = longi_bits_pa
     else:
         rang_max_crom = longi_bits_ma
-    chan_crom = random.randint(rang_max_crom,rang_max_crom)
+    chan_crom = random.randint(1,rang_max_crom)
 
 
-    #Mutación
-    indice_mut_1 = random.randint(0,1)
-    indice_mut_0 = random.randint(0,1)
-    crom_camb_0 = random.randint(0,chan_crom)
-    crom_camb_1 = random.randint(0,chan_crom)
-    
-    chan_crom
-    #Intercambiamos los cromosomas(los parametros en bits)    
-    temp_bits = '' #Temporal para trabjar los bits sobrantes
-    aux = 0
-    #Si no hemos cambiado todos los bits a cambiar entonces
-    while chan_crom > 0 :        
+    while chan_crom > 0:
         indice = 1
-        #Recorremos los parametros que estan en binario
         while indice < 7:
-            param = 0
-            #Cada parametro es un rango entonces cambiamos entre 0 y 1
-            while param < 2:                
-                #Longitudes de los parametros a intercambiar
-                lon_parm_0 = len(str(nuevos_indvs[0][indice][param])[2:])
-                lon_parm_1 = len(str(nuevos_indvs[1][indice][param])[2:])
-
-                #Si tenemos mutación cambiamos 1 solo bit del individuo
-                if indice_mut_0 == 1:
-                    rand = random.randrange(8)
-                    if crom_camb_0 <= (chan_crom+rand) and crom_camb_0 >= (chan_crom-rand):
-                        bit_camb_0 = random.randint(2,lon_parm_0-1)
-                        aux_str = list(str(nuevos_indvs[0][indice][param]))
-                        aux_str[bit_camb_0] = str(random.randint(0,1))
-                        nuevos_indvs[0][indice][param]= bin(int(str("".join(aux_str)),2))
-                    indice_mut_0 = 0
-                if indice_mut_1 == 1:
-                    rand = random.randrange(8)
-                    if crom_camb_1 <= (chan_crom+rand) and crom_camb_1 >= (chan_crom-rand):
-                        bit_camb_1 = random.randint(2,lon_parm_1-1)
-                        aux_str = list(str(nuevos_indvs[1][indice][param]))
-                        aux_str[bit_camb_1] = str(random.randint(0,1))
-                        nuevos_indvs[1][indice][param]= bin(int(str("".join(aux_str)),2))
-                    indice_mut_1 = 0
-
-                #Auxiliar que nos ayudara a hacer el intercambio de bits
-                aux_temp_bin = nuevos_indvs[0][indice][param]
-                #Si tienen el mismo largo los cambiamos de lugar no más
-                if lon_parm_0 == lon_parm_1:
-                    nuevos_indvs[0][indice][param] = nuevos_indvs[1][indice][param]
-                    nuevos_indvs[1][indice][param] = aux_temp_bin
-                    chan_crom -= lon_parm_0
-                #Si la longitud de la cadena de bits del individuo 0 es menor que la del individuo 1 entonces   
-                elif lon_parm_0 < lon_parm_1:
-                    #Ponemos los bits que exceden su largo en temp_bits
-                    temp_bits = bin(int(str(nuevos_indvs[1][indice][param])[lon_parm_0+2:],2))
-                    #Hacemos el intercambio de bits
-                    nuevos_indvs[0][indice][param] = bin(int(str(nuevos_indvs[1][indice][param])[:(lon_parm_0+2)],2))
-                    nuevos_indvs[1][indice][param] = bin(int(str(aux_temp_bin)[:(lon_parm_0+2)],2))
-                    #Le restamos la cantidad de bits intercambiados
-                    chan_crom -= lon_parm_0
-                    #Nos fijamos que no tengamos bits sobrantes
-                    #Si tenemos, lo pasaremos al siguiente espacio del parametro 1,si no lo pasamos al siguiente parametro
-                    #Si estamos en el último parametro se los ponemos al principio del último parametro
-                    if temp_bits != '':
-                        tempo_lon = len(temp_bits)
-                        if indice != 6:                            
-                            if param == 0:
-                                temp_bin_aux = str(nuevos_indvs[1][indice][1])
-                                nuevos_indvs[1][indice][1] = str(temp_bits)+(temp_bin_aux[2:])
-                            else:
-                                temp_bin_aux = str(nuevos_indvs[1][indice+1][0])
-                                nuevos_indvs[1][indice+1][0] = str(temp_bits)+(temp_bin_aux[2:])
-                            temp_bits = ''
-                        else:
-                            nuevos_indvs[0][indice][1] += str(temp_bits)[2:]
-                            temp_bits = ''
-                        chan_crom -= tempo_lon
-
-                else:
-                    #Lo mismo que la anterior pero al revés
-                    temp_bits = bin(int(str(nuevos_indvs[0][indice][param])[lon_parm_1+2:],2))
-                    nuevos_indvs[0][indice][param] = bin(int(str(nuevos_indvs[1][indice][param])[:(lon_parm_1+2)],2))
-                    nuevos_indvs[1][indice][param] = bin(int(str(aux_temp_bin)[:(lon_parm_1+2)],2))
-                    
-                    chan_crom -= lon_parm_1
-                    
-                    if temp_bits != '':
-                        tempo_lon = len(temp_bits)
-                        if indice != 6:
-                            if param == 0:
-                                temp_bin_aux = str(nuevos_indvs[0][indice][1])
-                                nuevos_indvs[0][indice][1] = str(temp_bits)+(temp_bin_aux[2:])                            
-                            else:                                
-                                temp_bin_aux = str(nuevos_indvs[0][indice+1][0])
-                                nuevos_indvs[0][indice+1][0] = str(temp_bits)+(temp_bin_aux[2:])
-                            temp_bits = ''
-                        else:
-                            nuevos_indvs[1][indice][1] += str(temp_bits)[2:]
-                            temp_bits = ''
-                        chan_crom -= tempo_lon
-
-                param += 1
+            parametro = 0
+            while parametro < 2:
+                param_0 = nuevos_indvs[0][indice][parametro]
+                param_1 = nuevos_indvs[1][indice][parametro]
+                long_par_0 = len(str(param_0)[2:])
+                long_par_1 = len(str(param_1)[2:])
+                if long_par_0 == long_par_1:
+                    temp_aux = param_0
+                    nuevos_indvs[0][indice][parametro] = param_1
+                    nuevos_indvs[1][indice][parametro] = temp_aux
+                    chan_crom -= long_par_0
+                elif long_par_0 < long_par_1:                
+                    temp_aux = param_0
+                    nuevos_indvs[0][indice][parametro] = param_1
+                    nuevos_indvs[1][indice][parametro] = temp_aux
+                    chan_crom -= long_par_1
+                else:                                
+                    temp_aux = param_0
+                    nuevos_indvs[0][indice][parametro] = param_1
+                    nuevos_indvs[1][indice][parametro] = temp_aux
+                    chan_crom -= long_par_0   
+                parametro += 1
             indice += 1
-        aux += 1
+
 
     #Pasamos todos los parametros de binario a enteros
     aux = 0
     while aux < 2:
+        #Mutación
+        muta_0 = 0
+        muta_1 = 0
+        indice_mut_1 = 0
+        indice_mut_0 = 0
+        if generaciones[gen][padre][-2] < 0.90 and generaciones[gen][madre][-2] < 0.90:        
+            indice_mut_1 = random.randint(1,11)
+            indice_mut_0 = random.randint(1,11)
+            
         indice = 1
         while indice < 7:
-            nuevos_indvs[aux][indice][0] = int(nuevos_indvs[aux][indice][0],2)
-            nuevos_indvs[aux][indice][1] = int(nuevos_indvs[aux][indice][1],2)                  
+            num_random_ = random.randint(1,10)
+            if indice_mut_0 == num_random_:
+                muta_0 = random.randint(1,2) * (random.choice([-1,1]))
+                indice_mut_0 = 0
+            num_random_ = random.randint(1,10)
+            if indice_mut_1 == num_random_:
+                muta_1 = random.randint(1,2) * (random.choice([-1,1]))
+                indice_mut_1 = 0
+
+            if indice == 1:
+                muta_0 = 5*muta_0*random.randint(1,4) 
+                muta_1 = 5*muta_1*random.randint(1,4)
+                
+                
+            nuevos_indvs[aux][indice][0] = int(nuevos_indvs[aux][indice][0],2)+muta_0
+            nuevos_indvs[aux][indice][1] = int(nuevos_indvs[aux][indice][1],2)+muta_1
+
+            muta_0 = 0
+            muta_1 = 0
             indice += 1
         aux += 1
     #Nos fijamos si ya tenemos la nueva generación
@@ -372,9 +434,15 @@ def cruce(padre,madre,gen,aux_nom):
     except:
         generaciones.append([])
 
-    #Agregamos los individuos a la nueva generación
-    generaciones[gen+1].append(nuevos_indvs[0])
-    generaciones[gen+1].append(nuevos_indvs[1])
+    #Verificamos los parametros de los individuos
+    list_0 = nuevos_indvs[0][:]
+    list_1 = nuevos_indvs[1][:]
+    hijo_0 = verifica_param(list_0)
+    hijo_1 = verifica_param(list_1)    
+
+    #Ingresamos los individuos
+    ingresar_indi(hijo_0,gen+1)
+    ingresar_indi(hijo_1,gen+1)
        
 
 def padres(padre,gen):
@@ -390,9 +458,9 @@ def padres(padre,gen):
     pa_ma = 0
     temp_normal = 0
     pos_pa_ma = 0
-    while pos_pa_ma < 9:     
-        temp_normal += generaciones[gen][pos_pa_ma][-1]
-        if padre <= temp_normal:
+    while pos_pa_ma < 10:
+        temp_normal += generaciones[gen][pos_pa_ma][-2]
+        if padre < temp_normal:            
             pa_ma = pos_pa_ma
             break        
         pos_pa_ma += 1        
@@ -401,54 +469,169 @@ def padres(padre,gen):
 
 
     
-def seleccion(niv_gen,nomb_fig):
+def seleccion(niv_gen,arrayIm):
     '''
     Entradas:
         niv_gen (nivel de la generacion a seleccionar)
-        nomb_fig (nombre de la figura a comparar)
+        arrayIm (array con la figura a comparar)
     Funcionalidad:
-        Utilizar la función de fitness(), normalizar los valores.
-        Y llamar a la nueva generación con cruce()
+        Utilizar la función de fitness(), normalizar los valores y agregarlos en los individuos.
     Salida:
         None
     '''
+    mat_por = []
     fractal_num=0
     avr = 0
-    while fractal_num < 9:
-        porcentaje = fitness(nomb_fig,carpeta+"\\"+generaciones[niv_gen][fractal_num][0]+".bmp")
-        if porcentaje > 0.75:
-            avr += 1-(((porcentaje-1)*4)*-1)
+    while fractal_num < 10:
+        porcentaje = fitness(arrayIm,carpeta+"\\"+generaciones[niv_gen][fractal_num][0]+".bmp")
+        porcentaje = (porcentaje-0.8)*5
+        if porcentaje < 0:
+            porcentaje = 0
+        mat_por.append(porcentaje)       
+        
+        if porcentaje > 0.90:
+            decim = 0.09
+            aux = 12
+            while decim >= -0.01:
+                suma = (0.90+decim)
+                if porcentaje >= suma:
+                    avr += round((porcentaje*(4**50)**aux),5)
+                    decim = -1
+                aux -= 1
+                decim -= 0.01                
+        elif porcentaje > 0.85:
+            avr += round((porcentaje*(4**20)),5)
+        elif porcentaje > 0.80:
+            avr += round((porcentaje*(4**15)),5)
+        elif porcentaje > 0.75: 
+            avr += round((porcentaje*(4**10)),5)
+        elif porcentaje > 0.70:
+            avr += round((porcentaje*(4**8)),5)
+        elif porcentaje > 0.65:
+            avr += round((porcentaje*(4**7)),5)
+        elif porcentaje > 0.60:
+            avr += round((porcentaje*(4**6)),5)
+        elif porcentaje > 0.50:
+            avr += round((porcentaje*(4**5)),5)
+        elif porcentaje > 0.40:
+            avr += round((porcentaje*(4**4)),5)
+        elif porcentaje > 0.30:
+            avr += round((porcentaje*(4**3)),5)
+        elif porcentaje > 0.20:
+            avr += round((porcentaje*(4**2)),5)
+        elif porcentaje > 0.10:
+            avr += round((porcentaje*(4**1)),5)    
+        else:
+            avr += porcentaje
         fractal_num += 1        
 
     fractal_num=0
-    while fractal_num < 9:
-        porcentaje = fitness(nomb_fig,carpeta+"\\"+generaciones[niv_gen][fractal_num][0]+".bmp")
-        if porcentaje > 0.75:
-            generaciones[niv_gen][fractal_num].append(round(((1-(((porcentaje-1)*4)*-1))/avr), 3))
+    while fractal_num < 10:
+        porcentaje = mat_por[fractal_num]
+        
+        if porcentaje > 0.90:
+            decim = 0.09
+            aux = 12
+            while decim >= -0.01:
+                suma = (0.90+decim)
+                if porcentaje >= suma:
+                    generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**50)**aux)/avr,3))
+                    decim = -1
+                aux -= 1
+                decim -= 0.01                
+        elif porcentaje > 0.85:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**20))/avr, 3))
+        elif porcentaje > 0.80:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**15))/avr, 3))
+        elif porcentaje > 0.75:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**10))/avr, 3))
+        elif porcentaje > 0.70:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**8))/avr, 3))
+        elif porcentaje > 0.65:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**7))/avr, 3))
+        elif porcentaje > 0.60:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**6))/avr, 3))
+        elif porcentaje > 0.50:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**5))/avr, 3))
+        elif porcentaje > 0.40:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**4))/avr, 3))
+        elif porcentaje > 0.30:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**3))/avr, 3))      
+        elif porcentaje > 0.20:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**2))/avr, 3))        
+        elif porcentaje > 0.10:
+            generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**1))/avr, 3))
         else:
-            generaciones[niv_gen][fractal_num].append(0)
+            generaciones[niv_gen][fractal_num].append(porcentaje/avr)
+            
+        generaciones[niv_gen][fractal_num].append(porcentaje)     
+        print("Fractal ",generaciones[niv_gen][fractal_num][0]," tiene un % de ",generaciones[niv_gen][fractal_num][-1], "normalizado queda ",generaciones[niv_gen][fractal_num][8])
         fractal_num += 1
-
-    nueva_fra = 0
-    while nueva_fra < 5:
-        pad = padres(random.random(),niv_gen)        
-        mad = padres(random.random(),niv_gen)
-        cruce(pad,mad,niv_gen,nueva_fra)            
-        nueva_fra += 1
+    print("\n---------------\n")
 
 
+def buscar_figura(arrayIm):
+    '''
+    Entradas:
+        arrayIm (array con la figura a comparar)
+    Funcionalidad:
+        Utilizar el algoritmo génetico para llegar a un nivel de población parecido al de la figura(nomb_fig)
+    Salida:
+        None
+    '''
+    niv_gen = 0
+    aux = 0
+    bandera = 0
+    while aux == 0:    
+        seleccion(niv_gen,arrayIm)
+        
+        if niv_gen != 0:
+            num_f = 0
+            while num_f < 10:
+                if generaciones[niv_gen][num_f][-1] >= 0.90: #(generaciones[niv_gen][0][-2] <= generaciones[niv_gen][num_f][-2])and(generaciones[niv_gen][0][-2] >= generaciones[niv_gen][num_f][-2]-0.03) and 
+                    bandera = 1
+                else:
+                    bandera = 0
+                    break
+                num_f += 1
+
+        if bandera == 1:        
+            print("\n\n\n\n\n\n\n\n------------------------------Encontrado\n\n\n\n\n\n")
+            aux = 1
+            break
+
+            
+        nueva_fra = 0
+        while nueva_fra < 5:
+            pad = padres(random.random(),niv_gen)        
+            mad = padres(random.random(),niv_gen)
+            cruce(pad,mad,niv_gen,nueva_fra)            
+            nueva_fra += 1
+            
+        niv_gen += 1
+        if niv_gen == 4000:
+            print("\n\n\n\n\n\n\n\n------------------------------NO Encontrado\n\n\n\n\n\n")
+            break
 
 
+def crear_car(carpeta):
+    '''
+    Entradas:
+        carpeta (string, nombre de la carpeta a crear)
+    Funcionalidad:
+        Crear una carpeta con el nombre que contiene 'carpeta'
+    Salida:
+        None
+    '''
+    try:
+        mkdir(carpeta)
+        print("\n Se creó la carpeta "+carpeta+" \n")
+    except:
+        print("\n Carpeta "+carpeta+" ya Creada \n")
 
-#Programa principal
 
-## Main
-pygame.init()
-window = pygame.display.set_mode((600, 600))
-pygame.display.set_caption("Fractal Tree")
-screen = pygame.display.get_surface()
-imagenames = ["A","B","C","D","E","F","G","H","I","J"]
-generaciones =[[]]
+    
+#-----Programa principal
 '''
 generaciones:
     [
@@ -465,34 +648,66 @@ Nivel de población 0 ->  [
                         ]
     ]
 '''
+##------ Main
+pygame.init()
+window = pygame.display.set_mode((600, 600))
+pygame.display.set_caption("Fractal Tree")
+screen = pygame.display.get_surface()
+imagenames = ["A","B","C","D","E","F","G","H","I","J"]
+generaciones =[[]]
 
-carpeta = "Poblacion"     
-try:
-    mkdir(carpeta)
-except:
-    print("Carpeta "+carpeta+" Creada")
 
-
-    
+carpeta = "Poblacion"
+crear_car(carpeta)
 creacion_pobla_ini()
+ruta_figura = "Figuras/Fig3.bmp"
+im = Image.open(ruta_figura)   
+arrayIm = np.array(im)
+buscar_figura(arrayIm)
+
+'''
+dibujarArbolAux(
+x1, y1, 
+profundidad, angulo_de_ramificaciones,diametro_nivel,diametro_tronco,ramificaciones,decremento_pro,rango_pro
+6 [6, 96] [2, 3] 4 [0, 1] [1, 1] [3, 6]
 
 
-nomb_fig = "Figuras/Fig1.bmp"
-niv_gen = 0
-seleccion(niv_gen,nomb_fig)
+angulo_de_ramificaciones,
+diametro_nivel,
+diametro_tronco,
+ramificaciones,
+decremento_pro,
+rango_pro)
+
+angulo1,angulo2,
+diametronivel1,diametronivel2,
+grozor1,grozor2,
+ramificacion1,ramificacion2,
+decremento1,decremento2,
+profundidad1,profundidad2,
+nombre_imagen,
+padre,madre,
+nivel_gen
 
 
-
-i= 0
-while i < 10:
-    print(generaciones[1][i])
-    i += 1
-
-
-
-
+ dibujarArbolAux(300, 550, -90,
+        [angulo1,angulo1+angulo2],
+        [diametronivel1,diametronivel2],
+        [grozor1,grozor2],
+        [ramificacion1,ramificacion2],
+        [decremento1,decremento2],
+        [profundidad1,profundidad2])
 
 
+                           (nuev_indiv[1][0],nuev_indiv[1][1],
+                            nuev_indiv[2][0],nuev_indiv[2][1],
+                            nuev_indiv[3][0],nuev_indiv[3][1],
+                            nuev_indiv[4][0],nuev_indiv[4][1],
+                            nuev_indiv[5][0],nuev_indiv[5][1],
+                            nuev_indiv[6][0],nuev_indiv[6][1],
+                            nuev_indiv[0],
+                            nuev_indiv[-1][0],nuev_indiv[-1][1],
+                            niv_gen)
 
-
+'''
 
