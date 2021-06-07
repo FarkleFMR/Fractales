@@ -79,7 +79,7 @@ def dibujarArbol(x1, y1, angulo, profundidad, angulo_de_ramificaciones,diametro_
 
         while ramas > 0:
            angulo_aux2 *= choice([-1, 1])
-           angulo_aux = angulo_aux2 * ramas#random.randrange(ramasR)           
+           angulo_aux = angulo_aux2 * random.randrange(ramasR)#ramas#         
            dibujarArbol(x2, y2, angulo + angulo_aux , profundidad - decremento_proR,angulo_de_ramificaciones,diametro_nivel,diametro_tronco-1,ramificaciones,decremento_pro,rango_pro)           
            ramas -= 1
            
@@ -186,21 +186,27 @@ def fitness(arrayIm,nombre_imagen):
         while columna < 300:
             color = arrayIm[fila][columna][0]            
             if color == 0:
-                change = 1            
+                change = 1              
             if change == 1:
-                punt += 2
+                punt += 10
                 if arrayIm2[fila][columna][0] == color:
-                    puntIgua += 1
-                if arrayIm2[fila][columna][0] == color:
-                    puntIgua += 1
-                if color == 0:
-                    if arrayIm2[fila][columna][0] != 0:
-                        puntIgua -= 1
+                    puntIgua += 10
+                    if color == 0:
+                        puntIgua += 10
+                        
+                if arrayIm2[fila][columna][0] != color:
+                    puntIgua -= 20                                                         
+                
                     
             columna += 1
         columna = 0
         fila += 1
     fitness = ((puntIgua)*100)/punt/100
+    if fitness <= 0:
+        fitness = 0.001
+    if fitness > 1:
+        fitness = 1
+        
     return fitness
 
 
@@ -401,17 +407,17 @@ def cruce(padre,madre,gen,aux_nom):
         muta_1 = 0
         indice_mut_1 = 0
         indice_mut_0 = 0
-        if generaciones[gen][padre][-2] < 0.90 and generaciones[gen][madre][-2] < 0.90:        
-            indice_mut_1 = random.randint(1,11)
-            indice_mut_0 = random.randint(1,11)
+        #if generaciones[gen][padre][-2] < 0.75 and generaciones[gen][madre][-2] < 0.75:        
+        indice_mut_1 = random.randint(1,10)
+        indice_mut_0 = random.randint(1,10)
             
         indice = 1
         while indice < 7:
-            num_random_ = random.randint(1,10)
+            num_random_ = random.randint(1,6)
             if indice_mut_0 == num_random_:
                 muta_0 = random.randint(1,2) * (random.choice([-1,1]))
                 indice_mut_0 = 0
-            num_random_ = random.randint(1,10)
+            num_random_ = random.randint(1,6)
             if indice_mut_1 == num_random_:
                 muta_1 = random.randint(1,2) * (random.choice([-1,1]))
                 indice_mut_1 = 0
@@ -486,7 +492,7 @@ def seleccion(niv_gen,arrayIm):
         porcentaje = fitness(arrayIm,carpeta+"\\"+generaciones[niv_gen][fractal_num][0]+".bmp")
         porcentaje = (porcentaje-0.8)*5
         if porcentaje < 0:
-            porcentaje = 0
+            porcentaje = 0.001
         mat_por.append(porcentaje)       
         
         if porcentaje > 0.90:
@@ -495,7 +501,7 @@ def seleccion(niv_gen,arrayIm):
             while decim >= -0.01:
                 suma = (0.90+decim)
                 if porcentaje >= suma:
-                    avr += round((porcentaje*(4**50)**aux),5)
+                    avr += round((porcentaje*(4**30)**aux),5)
                     decim = -1
                 aux -= 1
                 decim -= 0.01                
@@ -535,7 +541,7 @@ def seleccion(niv_gen,arrayIm):
             while decim >= -0.01:
                 suma = (0.90+decim)
                 if porcentaje >= suma:
-                    generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**50)**aux)/avr,3))
+                    generaciones[niv_gen][fractal_num].append(round((porcentaje*(4**30)**aux)/avr,3))
                     decim = -1
                 aux -= 1
                 decim -= 0.01                
@@ -588,7 +594,7 @@ def buscar_figura(arrayIm):
         if niv_gen != 0:
             num_f = 0
             while num_f < 10:
-                if generaciones[niv_gen][num_f][-1] >= 0.90: #(generaciones[niv_gen][0][-2] <= generaciones[niv_gen][num_f][-2])and(generaciones[niv_gen][0][-2] >= generaciones[niv_gen][num_f][-2]-0.03) and 
+                if generaciones[niv_gen][num_f][-1] >= 0.75: #(generaciones[niv_gen][0][-2] <= generaciones[niv_gen][num_f][-2])and(generaciones[niv_gen][0][-2] >= generaciones[niv_gen][num_f][-2]-0.03) and 
                     bandera = 1
                 else:
                     bandera = 0
@@ -660,7 +666,7 @@ generaciones =[[]]
 carpeta = "Poblacion"
 crear_car(carpeta)
 creacion_pobla_ini()
-ruta_figura = "Figuras/Fig3.bmp"
+ruta_figura = "Figuras/Fig2.bmp"
 im = Image.open(ruta_figura)   
 arrayIm = np.array(im)
 buscar_figura(arrayIm)
