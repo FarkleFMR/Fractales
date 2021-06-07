@@ -595,7 +595,7 @@ def buscar_figura(arrayIm):
         if niv_gen != 0:
             num_f = 0
             while num_f < 10:
-                if generaciones[niv_gen][num_f][-1] >= 0.83:
+                if generaciones[niv_gen][num_f][-1] >= 0.75:
                     bandera = 1
                 else:
                     bandera = 0
