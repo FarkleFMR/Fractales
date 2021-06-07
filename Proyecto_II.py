@@ -9,13 +9,14 @@
 import pygame, math
 import random
 import time
+import os
 from os import mkdir
 from random import choice
 from PIL import Image
 import numpy as np
 import copy
-
-
+import pickle
+from shutil import rmtree
 
 #Definicion de funciones
 
@@ -124,7 +125,7 @@ def generacion_de_fractales(angulo1,angulo2,diametronivel1,diametronivel2,grozor
         [decremento1,decremento2],[profundidad1,profundidad2])
     
     ima_salida = pygame.transform.scale(screen, (300, 300))
-    pygame.image.save(ima_salida,carpeta+"\\"+nombre_imagen+".bmp")
+    pygame.image.save(ima_salida,carpeta+"/"+nombre_imagen+".bmp")
     gen.append([nombre_imagen,[angulo1,angulo1+angulo2],[diametronivel1,diametronivel2],[grozor1,grozor2],
                 [ramificacion1,ramificacion2],[decremento1,decremento2],[profundidad1,profundidad2],
                  [padre,madre]
@@ -620,10 +621,34 @@ def buscar_figura(arrayIm):
             break
 
 
-def crear_car(carpeta):
+def iniciar_bus(nomb_fig):
+    '''
+    Entradas:
+        nomb_fig (nombre de la figura a comparar)
+    Funcionalidad:
+        Seleccionar la carpeta a trabjar
+        Empezar la busqueda de nuestro fractal parecido a la figura
+    Salida:
+        None
+    '''
+    global carpeta
+    carpeta = nomb_fig
+    crear_car(carpeta,0)
+    
+    ruta_figura = "Figuras/"+nomb_fig+".bmp"
+    im = Image.open(ruta_figura)   
+    arrayIm = np.array(im)
+    creacion_pobla_ini()
+    buscar_figura(arrayIm)
+    guardar_datos(generaciones,nomb_fig)
+
+
+
+def crear_car(carpeta,si_no):
     '''
     Entradas:
         carpeta (string, nombre de la carpeta a crear)
+        si_no (int de 0 o 1 si es 0 borra el contenido de la carpeta sino, no)
     Funcionalidad:
         Crear una carpeta con el nombre que contiene 'carpeta'
     Salida:
@@ -633,10 +658,39 @@ def crear_car(carpeta):
         mkdir(carpeta)
         print("\n Se creó la carpeta "+carpeta+" \n")
     except:
-        print("\n Carpeta "+carpeta+" ya Creada \n")
-
-
+        if si_no == 0:
+            print("\n Se borro la carpeta "+carpeta+" \n")
+            rmtree(carpeta)
+            crear_car(carpeta,1)
     
+
+
+def guardar_datos(datos,nombre_fig):
+    '''
+    Entradas:
+        nombre_fig (nombre de la matriz de la figura a guardar)
+    Funcionalidad:
+        Crear un archivo con nuestra matriz
+    Salida:
+        None
+    '''
+    with open(("Cargadas/"+nombre_fig+".pkl"), "wb") as f:
+        pickle.dump(datos, f)
+
+
+def cargar_datos(nombre_fig):
+    '''
+    Entradas:
+        nombre_fig (nombre de la matriz de la figura a cargar)
+    Funcionalidad:
+        Leer un archivo que contiene un matriz
+    Salida:
+        La matriz
+    '''
+    with open(("Cargadas/"+nombre_fig+".pkl"), "rb") as f:
+         return pickle.load(f)
+
+ 
 #-----Programa principal
 '''
 generaciones:
@@ -661,59 +715,6 @@ pygame.display.set_caption("Fractal Tree")
 screen = pygame.display.get_surface()
 imagenames = ["A","B","C","D","E","F","G","H","I","J"]
 generaciones =[[]]
+crear_car("Cargadas",1)
 
-
-carpeta = "Poblacion"
-crear_car(carpeta)
-creacion_pobla_ini()
-ruta_figura = "Figuras/Fig2.bmp"
-im = Image.open(ruta_figura)   
-arrayIm = np.array(im)
-buscar_figura(arrayIm)
-
-'''
-dibujarArbolAux(
-x1, y1, 
-profundidad, angulo_de_ramificaciones,diametro_nivel,diametro_tronco,ramificaciones,decremento_pro,rango_pro
-6 [6, 96] [2, 3] 4 [0, 1] [1, 1] [3, 6]
-
-
-angulo_de_ramificaciones,
-diametro_nivel,
-diametro_tronco,
-ramificaciones,
-decremento_pro,
-rango_pro)
-
-angulo1,angulo2,
-diametronivel1,diametronivel2,
-grozor1,grozor2,
-ramificacion1,ramificacion2,
-decremento1,decremento2,
-profundidad1,profundidad2,
-nombre_imagen,
-padre,madre,
-nivel_gen
-
-
- dibujarArbolAux(300, 550, -90,
-        [angulo1,angulo1+angulo2],
-        [diametronivel1,diametronivel2],
-        [grozor1,grozor2],
-        [ramificacion1,ramificacion2],
-        [decremento1,decremento2],
-        [profundidad1,profundidad2])
-
-
-                           (nuev_indiv[1][0],nuev_indiv[1][1],
-                            nuev_indiv[2][0],nuev_indiv[2][1],
-                            nuev_indiv[3][0],nuev_indiv[3][1],
-                            nuev_indiv[4][0],nuev_indiv[4][1],
-                            nuev_indiv[5][0],nuev_indiv[5][1],
-                            nuev_indiv[6][0],nuev_indiv[6][1],
-                            nuev_indiv[0],
-                            nuev_indiv[-1][0],nuev_indiv[-1][1],
-                            niv_gen)
-
-'''
-
+iniciar_bus("Fig2")
