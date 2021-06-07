@@ -717,4 +717,4 @@ imagenames = ["A","B","C","D","E","F","G","H","I","J"]
 generaciones =[[]]
 crear_car("Cargadas",1)
 
-iniciar_bus("Fig2")
+iniciar_bus("Fig7")
