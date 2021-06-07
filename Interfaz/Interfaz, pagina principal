@@ -1,81 +1,108 @@
 import tkinter as tk
 from tkinter import *
+from tkinter import filedialog #Importa para escoger archivos
+from functools import partial #Importa para pasar parametros por botones
 import os
-from tkinter.filedialog import askdirectory
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk #Importa para poner imagenes
+def continuar(path):
+    #Recibe el path de la silueta,menu para escoger ver la poblacion inicial o
+    #ver las generaciones, tambien va a correr el algortimo principal
+    archivo = path #Guarda el path de la silueta
+    def volver():#Vuelve a la ventana de elegir silueta
+        poblacion.destroy()
+        elegir_silueta()
+    poblacion = Toplevel(window)
+    poblacion.geometry("500x400")
+    backbtn = Button(master=poblacion,
+                     bg = "red",
+                     text = "Volver",
+                     width = 5,
+                     height = 3,
+                     command = volver)
+    backbtn.place(x=130,y=300)
+    pbibtn = Button(master=poblacion,
+                     bg = "gray",
+                     text = "Ver Poblacion inicial",
+                     width = 20,
+                     height = 3)
+    pbibtn.place(x=130,y=200)
+    pbibtn = Button(master=poblacion,
+                     bg = "gray",
+                     text = "Ver generaciones",
+                     width = 20,
+                     height = 3)
+    pbibtn.place(x=130,y=100)
+    
+    #Se inicia el programa
+    
+def elegir_silueta():
+    #Abre el menu para escoger la imagen desde archivos
+    window.withdraw()
+    archivo = ""
+    def volver():#Vuelve al menu principal
+        poblacion.destroy()
+        window.deiconify()
+    def seleccionar_img():
+        #Abre mis archivos para escoger la silueta del arbol y una vez elegida
+        #la coloca en la ventana
+        global archivo
+        archivo = filedialog.askopenfilename(title="abrir")#Abre mis archivos
+        images = Image.open(archivo)
+        smallimg = images.resize((300,300))
+        image = ImageTk.PhotoImage(smallimg)
+        canvas=Canvas(master=poblacion,width=300,height=300)
+        canvas.place(x=100,y=20)
+        canvas.image = image
+        canvas.create_image(0,0,image = image,anchor = "nw")
+    def continuar_aux(path):
+        # Lleva al menu de ver poblacion y generacion
+        #Recibe el path de la silueta
+        poblacion.destroy()
+        continuar(path)
+    poblacion = Toplevel(window)
+    poblacion.geometry("500x400")
+    marco = Frame(master=poblacion,width=300,height=300,bd=20,relief="groove")
+    marco.place(x=100,y=20)
+    backbtn = Button(master=poblacion,
+                     bg = "red",
+                     text = "Volver",
+                     width = 5,
+                     height = 2,
+                     command = volver)
+    backbtn.place(x=20,y=340)
+    selecarch = Button(master=poblacion,
+                     bg = "gray",
+                     text = "Seleccionar silueta",
+                     width = 30,
+                     height = 3,
+                     command = seleccionar_img)
+    selecarch.place(x=130,y=330)
+    conbtn = Button(master=poblacion,
+                     bg = "light green",
+                     text = "Continuar",
+                     width = 7,
+                     height = 2,
+                     command = partial(continuar_aux,archivo))
+    conbtn.place(x=420,y=340)
 window = Tk()
-window.geometry("950x500")
-def ver_poblacion():
-    #window.destroy()
-    poblacion = Toplevel(window)
-    poblacion.geometry("950x500")
-    mensaje = Label(master=poblacion,text = "Aqui va a mostrar ya sea las 10 imagenes o que el usuario escoja cual ver",font=(None,10))
-    mensaje.place(x=0,y=300)
-def ver_fitness():
-    #window.destroy()
-    poblacion = Toplevel(window)
-    poblacion.geometry("950x500")
-    mensaje = Label(master=poblacion,text = "Aqui va a mostrar el resultado de la comparacion",font=(None,10))
-    mensaje.place(x=0,y=300)
-def ver_individuo():
-    #window.destroy()
-    poblacion = Toplevel(window)
-    poblacion.geometry("950x500")
-    mensaje = Label(master=poblacion,text = "Aqui se va a escoger una generacion y un individuo de esa generacion",font=(None,10))
-    mensaje.place(x=0,y=300)
-def crear_pantalla_inicio():
+window.geometry("500x420")
+button1 = tk.Button(text="Elegir silueta",
+                        width = 15,
+                        height = 3,
+                        bg = "green",
+                        command=elegir_silueta)
+button1.place(x=200,y=350)
    
-    button1 = tk.Button(text="Ver poblacion inicial",
-                        width = 15,
-                        height = 3,
-                        bg = "green",
-                        command=ver_poblacion)
-    button1.place(x=30,y=350)
-    button2 = tk.Button(text="Ver resultados del fitness",
-                        width = 20,
-                        height = 3,
-                        bg = "green",
-                        command=ver_fitness)
-    button2.place(x=170,y=350)
-    button3 = tk.Button(text="Ver individuo",
-                        width = 15,
-                        height = 3,
-                        bg = "green",
-                        command=ver_individuo)
-    button3.place(x=340,y=350)
-    button4 = tk.Button(text="Ver descendencia",
-                        width = 15,
-                        height = 3,
-                        bg = "green")
-    button4.place(x=470,y=350)
-    button5 = tk.Button(text="Ver ascendensia",
-                        width = 20,
-                        height = 3,
-                        bg = "green")
-    button5.place(x=600,y=350)
-    button6 = tk.Button(text="Do nothing button",
-                        width = 20,
-                        height = 3,
-                        bg = "green")
-    button6.place(x=760,y=350)
 
-
-
-    #path = r"C:\Users\jenar\OneDrive\Imágenes\Arbol interfaz.png"
-    #assert os.path.isfile(path)
-   # with open(path, "r") as f:
-    #    pass
+nombre = tk.Label(text="Algoritmo genético",fg="lightgreen",font=(None,20))
+nombre.place(x=150,y=0)
     
+image = PhotoImage(file=r"C:\Users\jenar\OneDrive\Imágenes\Arbol interfaz.png")
+smaller_image = image.subsample(4,4)
+canvas=Canvas(width=800,height=300)
+canvas.place(x=100,y=45)
+canvas.image = smaller_image
+canvas.create_image(0,0,image = smaller_image,anchor = "nw")
 
-    nombre = tk.Label(text="Algoritmo genético",fg="lightgreen",font=(None,20))
-    nombre.place(x=375,y=0)
-    
-    image = PhotoImage(file=r"C:\Users\jenar\OneDrive\Imágenes\Arbol interfaz.png")
-    smaller_image = image.subsample(4,4)
-    canvas=Canvas(width=800,height=300)
-    canvas.place(x=322,y=45)
-    canvas.image = smaller_image
-    canvas.create_image(0,0,image = smaller_image,anchor = "nw")
-crear_pantalla_inicio()
-
+window.mainloop()
 
