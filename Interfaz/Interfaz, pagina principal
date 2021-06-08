@@ -1,4 +1,3 @@
-  
 #Creado por Leonardo Fariña y Murillo Aldecoba
 #Fecha de creación: 25/05/2020 10:10 pm
 #Última modificación: 07/06/2020 23:47 pm
@@ -626,11 +625,35 @@ def buscar_figura(arrayIm):
             print("\n\n\n\n\n\n\n\n------------------------------NO Encontrado\n\n\n\n\n\n")
             break
 
+'''
+def iniciar_bus(nomb_fig):
+    
+    Entradas:
+        nomb_fig (nombre de la figura a comparar)
+    Funcionalidad:
+        Seleccionar la carpeta a trabjar
+        Empezar la busqueda de nuestro fractal parecido a la figura
+    Salida:
+        None
+    
+    global carpeta
+    carpeta = nomb_fig
+    crear_car(carpeta,0)
 
-def crear_car(carpeta):
+    ruta_figura = "Figuras/"+nomb_fig+".bmp"
+    im = Image.open(ruta_figura)   
+    arrayIm = np.array(im)
+    creacion_pobla_ini()
+    buscar_figura(arrayIm)
+    guardar_datos(generaciones,nomb_fig)
+'''
+
+
+def crear_car(carpeta,si_no):
     '''
     Entradas:
         carpeta (string, nombre de la carpeta a crear)
+        si_no (int de 0 o 1 si es 0 borra el contenido de la carpeta sino, no)
     Funcionalidad:
         Crear una carpeta con el nombre que contiene 'carpeta'
     Salida:
@@ -641,10 +664,37 @@ def crear_car(carpeta):
         print("\n Se creó la carpeta "+carpeta+" \n")
     except:
         print("\n Carpeta "+carpeta+" ya Creada \n")
+        if si_no == 0:
+            print("\n Se borro la carpeta "+carpeta+" \n")
+            rmtree(carpeta)
+            crear_car(carpeta,1)
 
 
+def guardar_datos(datos,nombre_fig):
+     '''
+     Entradas:
+         nombre_fig (nombre de la matriz de la figura a guardar)
+     Funcionalidad:
+         Crear un archivo con nuestra matriz
+     Salida:
+         None
+     '''
+     with open(("Cargadas/"+nombre_fig+".pkl"), "wb") as f:
+        pickle.dump(datos, f)
 
-    
+
+def cargar_datos(nombre_fig):
+    '''
+    Entradas:
+        nombre_fig (nombre de la matriz de la figura a cargar)
+    Funcionalidad:
+        Leer un archivo que contiene un matriz
+    Salida:
+        La matriz
+    '''
+    with open(("Cargadas/"+nombre_fig+".pkl"), "rb") as f:
+         return pickle.load(f)
+   
 
 
 
@@ -681,7 +731,7 @@ def menu(estado):
                     hijoactual = total
                 else:
                     hijoactual -=1
-                images = Image.open("Poblacion/"+hijos[hijoactual]+".bmp")
+                images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
                 smallimg = images.resize((300,300))
                 image = ImageTk.PhotoImage(smallimg)
                 canvas=Canvas(master=hijo,width=300,height=300)
@@ -696,7 +746,7 @@ def menu(estado):
                 else:
                     hijoactual +=1
             
-                images = Image.open("Poblacion/"+hijos[hijoactual]+".bmp")
+                images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
                 smallimg = images.resize((300,300))
                 image = ImageTk.PhotoImage(smallimg)
                 canvas=Canvas(master=hijo,width=300,height=300)
@@ -707,7 +757,7 @@ def menu(estado):
             hijo = Toplevel(inicial)
             hijo.geometry("600x600")
             
-            images = Image.open("Poblacion/"+hijos[hijoactual]+".bmp")
+            images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
             smallimg = images.resize((300,300))
             image = ImageTk.PhotoImage(smallimg)
             canvas=Canvas(master=hijo,width=300,height=300)
@@ -750,7 +800,7 @@ def menu(estado):
             else:
                 arbolactual -=1
             
-            images = Image.open("Poblacion/"+generaciones[0][arbolactual][0]+".bmp")
+            images = Image.open(carpeta+"/"+generaciones[0][arbolactual][0]+".bmp")
             smallimg = images.resize((300,300))
             image = ImageTk.PhotoImage(smallimg)
             canvas=Canvas(master=inicial,width=300,height=300)
@@ -771,6 +821,8 @@ def menu(estado):
             decrementolabel.update()
             profundidadlabel.configure(text ="Rango de la profundidad: "+ str(generaciones[0][arbolactual][6]))
             profundidadlabel.update()
+            nombrelabel.configure(text = generaciones[0][arbolactual][0])
+            nombrelabel.update()
             hijobtn.place_forget()
             hijol.place_forget()
             hijo = []
@@ -793,7 +845,7 @@ def menu(estado):
             else:
                 arbolactual +=1
             
-            images = Image.open("Poblacion/"+generaciones[0][arbolactual][0]+".bmp")
+            images = Image.open(carpeta+"/"+generaciones[0][arbolactual][0]+".bmp")
             smallimg = images.resize((300,300))
             image = ImageTk.PhotoImage(smallimg)
             canvas=Canvas(master=inicial,width=300,height=300)
@@ -814,6 +866,8 @@ def menu(estado):
             decrementolabel.update()
             profundidadlabel.configure(text ="Rango de la profundidad: "+ str(generaciones[0][arbolactual][6]))
             profundidadlabel.update()
+            nombrelabel.configure(text = generaciones[0][arbolactual][0])
+            nombrelabel.update()
             hijobtn.place_forget()
             hijol.place_forget()
             hijo = []
@@ -833,7 +887,7 @@ def menu(estado):
         poblacion.withdraw()
         inicial = Toplevel(poblacion)
         inicial.geometry("600x600")
-        images = Image.open("Poblacion/"+generaciones[0][arbolactual][0]+".bmp")
+        images = Image.open(carpeta+"/"+generaciones[0][arbolactual][0]+".bmp")
         smallimg = images.resize((300,300))
         image = ImageTk.PhotoImage(smallimg)
         canvas=Canvas(master=inicial,width=300,height=300)
@@ -893,6 +947,8 @@ def menu(estado):
         decrementolabel.place(x=150,y=500)
         profundidadlabel = Label(master=inicial,text ="Rango de la profundidad: "+ str(generaciones[0][arbolactual][6]))
         profundidadlabel.place(x=150,y=530)
+        nombrelabel = Label(master=inicial,text = generaciones[0][arbolactual][0])
+        nombrelabel.place(x=260,y=1)
 
     def ver_generacion():
         def volver():
@@ -912,30 +968,34 @@ def menu(estado):
                     info.deiconify()
                 info.withdraw()
                 padres=Toplevel(info)
-                padres.geometry("800x600")
+                padres.geometry("770x430")
                 padre = generaciones[int(generacion.get())][arbolactual][7][0]
                 madre = generaciones[int(generacion.get())][arbolactual][7][1]
-                imagesp = Image.open("Poblacion/"+generaciones[int(generacion.get())-1][padre][0]+".bmp")
+                imagesp = Image.open(carpeta+"/"+generaciones[int(generacion.get())-1][padre][0]+".bmp")
                 smallimgp = imagesp.resize((300,300))
                 imagep = ImageTk.PhotoImage(smallimgp)
                 canvas=Canvas(master=padres,width=300,height=300)
                 canvas.place(x=40,y=20)
                 canvas.image = imagep
                 canvas.create_image(0,0,image = imagep,anchor = "nw")
-                imagesm = Image.open("Poblacion/"+generaciones[int(generacion.get())-1][madre][0]+".bmp")
+                imagesm = Image.open(carpeta+"/"+generaciones[int(generacion.get())-1][madre][0]+".bmp")
                 smallimgm = imagesm.resize((300,300))
                 imagem = ImageTk.PhotoImage(smallimgm)
                 canvas=Canvas(master=padres,width=300,height=300)
                 canvas.place(x=420,y=20)
                 canvas.image = imagem
                 canvas.create_image(0,0,image = imagem,anchor = "nw")
+                padrelabel = Label(master=padres,text = "Padre")
+                padrelabel.place(x=170,y=1)
+                padrelabel = Label(master=padres,text = "Madre")
+                padrelabel.place(x=550,y=1)
                 backbtn = Button(master=padres,
                          bg = "red",
                          text = "Volver",
-                         width = 5,
+                         width = 10,
                          height = 3,
                          command = volver)
-                backbtn.place(x=10,y=350)
+                backbtn.place(x=340,y=350)
             def verhijos(hijos):
                 global hijoactual
                 hijoactual = 0
@@ -951,7 +1011,7 @@ def menu(estado):
                         hijoactual = total
                     else:
                         hijoactual -=1
-                    images = Image.open("Poblacion/"+hijos[hijoactual]+".bmp")
+                    images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
                     smallimg = images.resize((300,300))
                     image = ImageTk.PhotoImage(smallimg)
                     canvas=Canvas(master=hijo,width=300,height=300)
@@ -966,7 +1026,7 @@ def menu(estado):
                     else:
                         hijoactual +=1
                 
-                    images = Image.open("Poblacion/"+hijos[hijoactual]+".bmp")
+                    images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
                     smallimg = images.resize((300,300))
                     image = ImageTk.PhotoImage(smallimg)
                     canvas=Canvas(master=hijo,width=300,height=300)
@@ -977,7 +1037,7 @@ def menu(estado):
                 hijo = Toplevel(info)
                 hijo.geometry("600x600")
                 
-                images = Image.open("Poblacion/"+hijos[hijoactual]+".bmp")
+                images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
                 smallimg = images.resize((300,300))
                 image = ImageTk.PhotoImage(smallimg)
                 canvas=Canvas(master=hijo,width=300,height=300)
@@ -1020,7 +1080,7 @@ def menu(estado):
                 else:
                     arbolactual -=1
                 
-                images = Image.open("Poblacion/"+generaciones[int(generacion.get())][arbolactual][0]+".bmp")
+                images = Image.open(carpeta+"/"+generaciones[int(generacion.get())][arbolactual][0]+".bmp")
                 smallimg = images.resize((300,300))
                 image = ImageTk.PhotoImage(smallimg)
                 canvas=Canvas(master=info,width=300,height=300)
@@ -1041,6 +1101,8 @@ def menu(estado):
                 decrementolabel.update()
                 profundidadlabel.configure(text ="Rango de la profundidad: "+ str(generaciones[int(generacion.get())][arbolactual][6]))
                 profundidadlabel.update()
+                nombrelabel.configure(text = generaciones[int(generacion.get())][arbolactual][0])
+                nombrelabel.update()
                 hijobtn.place_forget()
                 hijol.place_forget()
                 hijo = []
@@ -1064,7 +1126,7 @@ def menu(estado):
                 else:
                     arbolactual +=1
                 
-                images = Image.open("Poblacion/"+generaciones[int(generacion.get())][arbolactual][0]+".bmp")
+                images = Image.open(carpeta+"/"+generaciones[int(generacion.get())][arbolactual][0]+".bmp")
                 smallimg = images.resize((300,300))
                 image = ImageTk.PhotoImage(smallimg)
                 canvas=Canvas(master=info,width=300,height=300)
@@ -1085,6 +1147,8 @@ def menu(estado):
                 decrementolabel.update()
                 profundidadlabel.configure(text ="Rango de la profundidad: "+ str(generaciones[int(generacion.get())][arbolactual][6]))
                 profundidadlabel.update()
+                nombrelabel.configure(text = generaciones[int(generacion.get())][arbolactual][0])
+                nombrelabel.update()
                 hijobtn.place_forget()
                 hijol.place_forget()
                 hijo = []
@@ -1101,7 +1165,7 @@ def menu(estado):
             gen.withdraw()
             info = Toplevel(gen)
             info.geometry("600x600")
-            images = Image.open("Poblacion/"+generaciones[int(generacion.get())][arbolactual][0]+".bmp")
+            images = Image.open(carpeta+"/"+generaciones[int(generacion.get())][arbolactual][0]+".bmp")
             smallimg = images.resize((300,300))
             image = ImageTk.PhotoImage(smallimg)
             canvas=Canvas(master=info,width=300,height=300)
@@ -1169,6 +1233,8 @@ def menu(estado):
             decrementolabel.place(x=150,y=500)
             profundidadlabel = Label(master=info,text ="Rango de la profundidad: "+ str(generaciones[int(generacion.get())][arbolactual][6]))
             profundidadlabel.place(x=150,y=530)
+            nombrelabel = Label(master=info,text = generaciones[int(generacion.get())][arbolactual][0])
+            nombrelabel.place(x=260,y=1)
 
 
 
@@ -1233,6 +1299,7 @@ def elegir_silueta():
     #Abre el menu para escoger la imagen desde archivos
     window.withdraw()
     archivo = ""
+    figura = ""
     def volver():#Vuelve al menu principal
         poblacion.destroy()
         window.deiconify()
@@ -1240,7 +1307,11 @@ def elegir_silueta():
         #Abre mis archivos para escoger la silueta del arbol y una vez elegida
         #la coloca en la ventana
         global archivo
+        global figura
+        global carpeta
         archivo = filedialog.askopenfilename(title="abrir")#Abre mis archivos
+        figura = os.path.basename(archivo)[:-4]
+        carpeta = figura
         images = Image.open(archivo)
         smallimg = images.resize((300,300))
         image = ImageTk.PhotoImage(smallimg)
@@ -1253,15 +1324,20 @@ def elegir_silueta():
         #Recibe el path de la silueta
         #Se inicia el programa
         global archivo
-        generaciones =[[]]
-        for file in os.listdir("Poblacion"):
-            os.remove(f'Poblacion/{file}')
-        creacion_pobla_ini()
+        global carpeta
+        global generaciones
+        #for file in os.listdir("Poblacion"):
+        #    os.remove(f'Poblacion/{file}')
+        
+        crear_car(carpeta,0)
         im = Image.open(archivo)   
         arrayim = np.array(im)
+        creacion_pobla_ini()
         buscar_figura(arrayim)
         poblacion.destroy()
         menu(1)
+        guardar_datos(generaciones,carpeta)
+        
     poblacion = Toplevel(window)
     poblacion.geometry("500x400")
     marco = Frame(master=poblacion,width=300,height=300,bd=20,relief="groove")
@@ -1298,7 +1374,15 @@ def cargar():
         #Abre mis archivos para escoger la silueta del arbol y una vez elegida
         #la coloca en la ventana
         global archivo
+        global generaciones
+        global carpeta
         archivo = filedialog.askopenfilename(title="abrir")#Abre mis archivos
+        print(archivo)
+        figura=os.path.basename(archivo[:-4])
+        print(figura)
+        carpeta = figura
+        with open(("Cargadas/"+figura+".pkl"),"rb") as f:
+            generaciones = pickle.load(f)
     def continuar_aux():
         # Lleva al menu de ver poblacion y generacion
         #Recibe el path de la silueta
@@ -1338,13 +1422,14 @@ imagenames = ["A","B","C","D","E","F","G","H","I","J"]
 generaciones =[[]]
 
 
-carpeta = "Poblacion"
-crear_car(carpeta)
-
+crear_car("Cargadas",1)
+carpeta = ""
 
 
 window = Tk()
 window.geometry("500x420")
+window.title("Proyecto2")
+
 button1 = tk.Button(text="Elegir silueta",
                         width = 15,
                         height = 3,
@@ -1371,5 +1456,3 @@ arrayim=[]
 
 
 window.mainloop()
-
-
