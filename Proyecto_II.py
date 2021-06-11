@@ -80,7 +80,7 @@ def dibujarArbol(x1, y1, angulo, profundidad, angulo_de_ramificaciones,diametro_
 
         while ramas > 0:
            angulo_aux2 *= choice([-1, 1])
-           angulo_aux = angulo_aux2 * random.randrange(ramasR)#ramas#         
+           angulo_aux = angulo_aux2 * random.randrange(ramasR)#ramas#        
            dibujarArbol(x2, y2, angulo + angulo_aux , profundidad - decremento_proR,angulo_de_ramificaciones,diametro_nivel,diametro_tronco-1,ramificaciones,decremento_pro,rango_pro)           
            ramas -= 1
            
@@ -416,11 +416,11 @@ def cruce(padre,madre,gen,aux_nom):
         while indice < 7:
             num_random_ = random.randint(1,6)
             if indice_mut_0 == num_random_:
-                muta_0 = random.randint(1,2) * (random.choice([-1,1]))
+                muta_0 = random.randint(1,3) * (random.choice([-1,1]))
                 indice_mut_0 = 0
             num_random_ = random.randint(1,6)
             if indice_mut_1 == num_random_:
-                muta_1 = random.randint(1,2) * (random.choice([-1,1]))
+                muta_1 = random.randint(1,3) * (random.choice([-1,1]))
                 indice_mut_1 = 0
 
             if indice == 1:
@@ -717,4 +717,4 @@ imagenames = ["A","B","C","D","E","F","G","H","I","J"]
 generaciones =[[]]
 crear_car("Cargadas",1)
 
-iniciar_bus("Fig7")
+iniciar_bus("Fig6")
