@@ -1,6 +1,6 @@
 #Creado por Leonardo Fariña y Murillo Aldecoba
 #Fecha de creación: 25/05/2020 10:10 pm
-#Última modificación: 07/06/2020 23:47 pm
+#Última modificación: 11/06/2020 18:47 pm
 #Versión 3.9.2
 
 #Importación de librerias
@@ -227,7 +227,6 @@ def ingresar_indi(nuev_indiv,niv_gen):
     Salida:
         None
     '''
-    print("Ingr ",nuev_indiv)
     generacion_de_fractales(nuev_indiv[1][0],nuev_indiv[1][1],
                             nuev_indiv[2][0],nuev_indiv[2][1],
                             nuev_indiv[3][0],nuev_indiv[3][1],
@@ -576,10 +575,8 @@ def seleccion(niv_gen,arrayIm):
         else:
             generaciones[niv_gen][fractal_num].append(porcentaje/avr)
             
-        generaciones[niv_gen][fractal_num].append(porcentaje)     
-        print("Fractal ",generaciones[niv_gen][fractal_num][0]," tiene un % de ",generaciones[niv_gen][fractal_num][-1], "normalizado queda ",generaciones[niv_gen][fractal_num][8])
+        generaciones[niv_gen][fractal_num].append(porcentaje)         
         fractal_num += 1
-    print("\n---------------\n")
 
 
 def buscar_figura(arrayIm):
@@ -608,7 +605,6 @@ def buscar_figura(arrayIm):
                 num_f += 1
 
         if bandera == 1:        
-            print("\n\n\n\n\n\n\n\n------------------------------Encontrado\n\n\n\n\n\n")
             aux = 1
             break
 
@@ -622,7 +618,7 @@ def buscar_figura(arrayIm):
             
         niv_gen += 1
         if niv_gen == 4000:
-            print("\n\n\n\n\n\n\n\n------------------------------NO Encontrado\n\n\n\n\n\n")
+           
             break
 
 '''
@@ -731,6 +727,8 @@ def menu(estado):
                     hijoactual = total
                 else:
                     hijoactual -=1
+                nombrelabel.configure(text = hijos[hijoactual])
+                nombrelabel.update()
                 images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
                 smallimg = images.resize((300,300))
                 image = ImageTk.PhotoImage(smallimg)
@@ -745,7 +743,8 @@ def menu(estado):
                     hijoactual = 0
                 else:
                     hijoactual +=1
-            
+                nombrelabel.configure(text = hijos[hijoactual])
+                nombrelabel.update()
                 images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
                 smallimg = images.resize((300,300))
                 image = ImageTk.PhotoImage(smallimg)
@@ -764,7 +763,8 @@ def menu(estado):
             canvas.place(x=120,y=20)
             canvas.image = image
             canvas.create_image(0,0,image = image,anchor = "nw")
-            
+            nombrelabel = Label(master=hijo,text = hijos[hijoactual])
+            nombrelabel.place(x=260,y=1)
             backbtn = Button(master=hijo,
                      bg = "red",
                      text = "Volver",
@@ -786,7 +786,18 @@ def menu(estado):
                          height = 3,
                          command = siguiente)
             sigbtn.place(x=450,y=150)
-        
+        def verdeseado():
+                wish = Toplevel(inicial)
+                wish.geometry("400x400")
+                nombrelabel = Label(master=wish,text = "Arbol deseado")
+                nombrelabel.place(x=160,y=1)
+                images = Image.open("Siluetas/"+carpeta+".bmp")
+                smallimg = images.resize((300,300))
+                image = ImageTk.PhotoImage(smallimg)
+                canvas=Canvas(master=wish,width=300,height=300)
+                canvas.place(x=50,y=20)
+                canvas.image = image
+                canvas.create_image(0,0,image = image,anchor = "nw")
         def volver():
             inicial.destroy()
             poblacion.deiconify()
@@ -932,6 +943,12 @@ def menu(estado):
                      width = 10,
                      height = 3,
                      command = siguiente)
+        deseadobtn = Button(master=inicial,
+                     text = "Ver arbol deseado",
+                     width = 20,
+                     height = 3,
+                     command = verdeseado)
+        deseadobtn.place(x=420,y=410)
         sigbtn.place(x=450,y=150)
         fitlabel = Label(master=inicial,text ="Fitness: "+ str(generaciones[0][arbolactual][-1]))
         fitlabel.place(x=150,y=350)
@@ -989,6 +1006,10 @@ def menu(estado):
                 padrelabel.place(x=170,y=1)
                 padrelabel = Label(master=padres,text = "Madre")
                 padrelabel.place(x=550,y=1)
+                pnamelabel = Label(master=padres,text = generaciones[int(generacion.get())-1][padre][0])
+                mnamelabel = Label(master=padres,text = generaciones[int(generacion.get())-1][madre][0])
+                pnamelabel.place(x=170,y=330)
+                mnamelabel.place(x=550,y=330)
                 backbtn = Button(master=padres,
                          bg = "red",
                          text = "Volver",
@@ -1011,6 +1032,8 @@ def menu(estado):
                         hijoactual = total
                     else:
                         hijoactual -=1
+                    nombrelabel.configure(text = hijos[hijoactual])
+                    nombrelabel.update()
                     images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
                     smallimg = images.resize((300,300))
                     image = ImageTk.PhotoImage(smallimg)
@@ -1025,7 +1048,8 @@ def menu(estado):
                         hijoactual = 0
                     else:
                         hijoactual +=1
-                
+                    nombrelabel.configure(text = hijos[hijoactual])
+                    nombrelabel.update()
                     images = Image.open(carpeta+"/"+hijos[hijoactual]+".bmp")
                     smallimg = images.resize((300,300))
                     image = ImageTk.PhotoImage(smallimg)
@@ -1044,7 +1068,8 @@ def menu(estado):
                 canvas.place(x=120,y=20)
                 canvas.image = image
                 canvas.create_image(0,0,image = image,anchor = "nw")
-                
+                nombrelabel = Label(master=hijo,text = hijos[hijoactual])
+                nombrelabel.place(x=260,y=1)
                 backbtn = Button(master=hijo,
                          bg = "red",
                          text = "Volver",
@@ -1070,6 +1095,18 @@ def menu(estado):
             def volver():
                 info.destroy()
                 gen.deiconify()
+            def verdeseado():
+                wish = Toplevel(info)
+                wish.geometry("400x400")
+                nombrelabel = Label(master=wish,text = "Arbol deseado")
+                nombrelabel.place(x=160,y=1)
+                images = Image.open("Siluetas/"+carpeta+".bmp")
+                smallimg = images.resize((300,300))
+                image = ImageTk.PhotoImage(smallimg)
+                canvas=Canvas(master=wish,width=300,height=300)
+                canvas.place(x=50,y=20)
+                canvas.image = image
+                canvas.create_image(0,0,image = image,anchor = "nw")
             def anterior():
                 global arbolactual
                 global hijo
@@ -1112,7 +1149,7 @@ def menu(estado):
                             hijo+=[generaciones[int(generacion.get())+1][i][0]]
                 if len(hijo) > 0:
                     hijobtn.configure(command=partial(verhijos,hijo))
-                    hijobtn.place(x=10,y=410)
+                    hijobtn.place(x=10,y=470)
                 else:
                     hijol.place(x=150,y=560)
                 
@@ -1158,7 +1195,7 @@ def menu(estado):
                             hijo+=[generaciones[int(generacion.get())+1][i][0]]
                 if len(hijo) > 0:
                     hijobtn.configure(command=partial(verhijos,hijo))
-                    hijobtn.place(x=10,y=410)
+                    hijobtn.place(x=10,y=470)
                 else:
                     hijol.place(x=150,y=560)
                 hijo = hijo            
@@ -1183,7 +1220,7 @@ def menu(estado):
                             width = 10,
                             height = 3,
                             command = partial(verhijos,hijo))
-            hijobtn.place(x=10,y=410)
+            hijobtn.place(x=10,y=470)
             hijol = Label(master=info,text="No tiene hijos")
             hijol.place(x=150,y=560)
             padrebtn = Button(master=info,
@@ -1191,8 +1228,13 @@ def menu(estado):
                             width = 10,
                             height = 3,
                             command = verpadres)
-            padrebtn.place(x=10,y=470)
-
+            padrebtn.place(x=10,y=410)
+            deseadobtn = Button(master=info,
+                            text = "Ver arbol deseado",
+                            width = 20,
+                            height = 3,
+                            command = verdeseado)
+            deseadobtn.place(x=420,y=410)
             if len(hijo) > 0:
                 hijol.place_forget()
             else:
@@ -1235,8 +1277,8 @@ def menu(estado):
             profundidadlabel.place(x=150,y=530)
             nombrelabel = Label(master=info,text = generaciones[int(generacion.get())][arbolactual][0])
             nombrelabel.place(x=260,y=1)
-
-
+            
+            
 
 
 
@@ -1446,7 +1488,7 @@ button2.place(x=250,y=350)
 nombre = tk.Label(text="Algoritmo genético",fg="lightgreen",font=(None,20))
 nombre.place(x=150,y=0)
     
-image = PhotoImage(file=r"Arbol interfaz.png")
+image = PhotoImage(file=r"C:\Users\jenar\OneDrive\Imágenes\Arbol interfaz.png")
 smaller_image = image.subsample(4,4)
 canvas=Canvas(width=800,height=300)
 canvas.place(x=100,y=45)
