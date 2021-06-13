@@ -1100,7 +1100,7 @@ def menu(estado):
                 wish.geometry("400x400")
                 nombrelabel = Label(master=wish,text = "Arbol deseado")
                 nombrelabel.place(x=160,y=1)
-                images = Image.open("Siluetas/"+carpeta+".bmp")
+                images = Image.open("Figuras/"+carpeta+".bmp")
                 smallimg = images.resize((300,300))
                 image = ImageTk.PhotoImage(smallimg)
                 canvas=Canvas(master=wish,width=300,height=300)
